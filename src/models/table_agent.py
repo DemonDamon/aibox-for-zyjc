@@ -20,9 +20,15 @@ class TableQARequest(BaseModel):
         arbitrary_types_allowed = True
 
 
-class TableQAResponse(BaseModel):
+# 定义响应的数据结构
+class ResponseData(BaseModel):
     request_id: str = Field(..., description="单次请求id")
     session_id: str = Field(..., description="当前对话id")
+    text: str = Field(..., max_length=2000, description="当前系统回复的text")
+
+
+class TableQAResponse(BaseModel):
     success: bool = Field(..., description="判断状态标识")
     code: str = Field(..., description="返回码")
     message: str = Field(..., description="具体信息")
+    data: Optional[ResponseData] = None  # 数据对象

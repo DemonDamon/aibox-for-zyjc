@@ -101,6 +101,7 @@ def test_3():
 
 
 def test_4():
+    # 根目录在src，去src/services下查看
     from services.qwen_langchain_service import Qwen
 
     # 数据
