@@ -9,7 +9,6 @@
 # =====================================================
 
 from abc import ABC, abstractmethod
-# from apps.common.payloads.document import Document
 from typing import List
 
 
