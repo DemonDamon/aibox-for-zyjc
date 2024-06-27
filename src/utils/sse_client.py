@@ -7,7 +7,7 @@
 
 # 2024/2/6 09:25   Create
 # =====================================================
-from utils.logger import logger
+from utils.logger_utils import logger
 
 _FIELD_SEPARATOR = ':'
 

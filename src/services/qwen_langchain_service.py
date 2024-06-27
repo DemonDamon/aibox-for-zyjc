@@ -5,17 +5,18 @@
 # E-mail  : bingzhenli@hotmail.com
 
 
-import logging
-from typing import Any, List, Mapping, Optional
-
 import json
-import requests
+import uuid
+from typing import Any, Iterator, List, Optional
 
+import requests
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
-# from langchain.llms.utils import enforce_stop_tokens
+from langchain_core.outputs import GenerationChunk
 
-logger = logging.getLogger(__name__)
+# from langchain.llms.utils import enforce_stop_tokens
+from utils.logger_utils import logger
+from utils.sse_client import SSEClient
 
 
 class Qwen(LLM):
@@ -48,11 +49,11 @@ class Qwen(LLM):
         return "qwen"
 
     def _call(
-        self,
-        prompt: str,
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
+            self,
+            prompt: str,
+            stop: Optional[List[str]] = None,
+            run_manager: Optional[CallbackManagerForLLMRun] = None,
+            **kwargs: Any,
     ) -> str:
         """Call out to a Qwen LLM inference endpoint.
 
@@ -75,7 +76,7 @@ class Qwen(LLM):
         self.messages.append({"role": "user", "content": prompt})
 
         payload = json.dumps({
-            "request_id": "sassasaa11w1",
+            "request_id": str(uuid.uuid4().hex),
             "model": self.model,
             "messages": self.messages,
             "stream": self.stream_flag,
@@ -117,3 +118,64 @@ class Qwen(LLM):
             )
 
         return text
+
+    def _stream(
+            self,
+            prompt: str,
+            stop: Optional[List[str]] = None,
+            run_manager: Optional[CallbackManagerForLLMRun] = None,
+            **kwargs: Any,
+    ) -> Iterator[GenerationChunk]:
+        headers = {"Content-Type": "application/json"}
+
+        self.messages.append({"role": "user", "content": prompt})
+
+        payload = json.dumps({
+            "request_id": str(uuid.uuid4().hex),
+            "model": self.model,
+            "messages": self.messages,
+            "stream": True,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "top_p": self.top_p
+        })
+
+        logger.debug(f"Qwen payload: {payload}")
+        # call api
+        try:
+            response = requests.request("POST", self.endpoint_url, headers=headers, data=payload)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
+
+        if response.status_code != 200:
+            raise ValueError(f"Failed with response: {response}")
+
+        sse_client = SSEClient(response)
+        for event in sse_client.events(is_async=False):
+            parsed_response = json.loads(event.data)
+            logger.debug(f"Qwen response: {parsed_response}")
+            delta = parsed_response["choices"][0]["delta"]
+            text = delta.get("content", None)
+            if text is None:
+                continue
+
+            request_id = parsed_response["id"]
+            finish_reason = parsed_response["choices"][0]["finish_reason"]
+            chunk = GenerationChunk(
+                text=text,
+                generation_info=dict(
+                    finish_reason=finish_reason,
+                    request_id=request_id,
+                )
+            )
+
+            if "usage" in parsed_response.keys():
+                token_usage = parsed_response["usage"]["total_tokens"]
+                chunk.generation_info["token_usage"] = token_usage
+
+            if run_manager:
+                run_manager.on_llm_new_token(chunk.text)
+            yield chunk
+
+            if finish_reason is not None:
+                break

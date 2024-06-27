@@ -2,4 +2,6 @@
 /tests/data/经济数据/
 logs/
 ~*
+*.log
+*.csv
 makefile

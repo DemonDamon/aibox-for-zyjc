@@ -6,11 +6,12 @@
 
 from typing import Union
 from uuid import uuid4
-from fastapi import APIRouter, Depends, HTTPException
-from utils.sse import EventSourceResponse, ServerSentEvent
 
-from models.table_agent import RequestModel, ResponseModel, ResponseData
+from fastapi import APIRouter
+
+from models.table_agent import RequestModel, ResponseData, ResponseModel
 from settings.dev import *
+from utils.sse import EventSourceResponse, ServerSentEvent
 
 api_router = APIRouter()
 

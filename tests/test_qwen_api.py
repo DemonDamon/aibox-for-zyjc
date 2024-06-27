@@ -66,3 +66,15 @@ def test_2():
     response = chain.run(question)
 
     print(response)
+
+
+if __name__ == '__main__':
+    # 定义模型参数
+    from services.qwen_langchain_service import Qwen
+    model_name = "Qwen1.5-32B-Chat-GPTQ-Int4"
+    endpoint_url = "http://192.168.32.113:7820/aibox/v1/llm/chat/completions"
+
+    # 初始化Qwen模型
+    qwen_llm = Qwen(model=model_name, endpoint_url=endpoint_url, stream=True)
+    for i in qwen_llm.stream("你好"):
+        print(i)
