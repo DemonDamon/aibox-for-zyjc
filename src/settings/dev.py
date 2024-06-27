@@ -7,7 +7,7 @@
 
 PROJECT_NAME = "龙政智搜"
 HOST = "0.0.0.0"
-PORT = 5000
+PORT = 5001
 DEBUG = True
 LIFESPAN = "on"
 

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic_settings
+openpyxl
+python-docx
+pandas

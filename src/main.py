@@ -9,8 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 
 import settings.dev as settings
-from src.api_routers.table_agent_api import api_router as table_agent_api_router
-
+from api_routers.table_agent_api import api_router as table_agent_api_router
 
 # 创建App
 app = FastAPI(
@@ -19,9 +18,11 @@ app = FastAPI(
 )
 
 # 注册路由
-app.include_router(table_agent_api_router,
-                   prefix="/cmict", tags=["Table Agent APIs"])
-
+app.include_router(
+    table_agent_api_router,
+    prefix="/cmict",
+    tags=["Table Agent APIs"]
+)
 
 if __name__ == '__main__':
     uvicorn.run(

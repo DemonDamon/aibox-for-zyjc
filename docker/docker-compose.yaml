@@ -1,0 +1,29 @@
+version: "3.0"
+
+services:
+  aibox-for-zyjc:
+    build:
+      context: ./src
+      dockerfile: docker/Dockerfile
+    image: ${INFERENCE_IMAGE:-aibox-for-zyjc}:${TAG:-latest}
+    container_name: aibox-for-zyjc
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "5000:5001"
+    networks:
+      - richinfo
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro
+      - ../src:/opt/app
+    command: python main.py --app-type zyjc
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+
+networks:
+  richinfo:
+    external: true
