@@ -1,4 +1,5 @@
 /.idea/
 /tests/data/经济数据/
+logs/
 ~*
 makefile

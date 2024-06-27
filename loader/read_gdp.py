@@ -11,11 +11,13 @@
 
 from loader.xlsx_loader import XlsxLoader
 
+
 def read_dpg(filepath):
     loader = XlsxLoader(filepath)
-    result=loader.load()
-    result=''.join(result)
+    result = loader.load()
+    result = ''.join(result)
     print(result)
+
 
 if __name__ == '__main__':
     read_dpg(r"../tests/data/GDP.xlsx")
