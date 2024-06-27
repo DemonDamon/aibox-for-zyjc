@@ -10,7 +10,7 @@ from typing import Optional
 from fastapi import UploadFile
 
 
-class TableQARequest(BaseModel):
+class RequestModel(BaseModel):
     request_id: str = Field(..., description="单次请求id")
     session_id: str = Field(..., description="当前对话id")
     query: str = Field(..., max_length=2000, description="当前用户输入text，限制2k以内")
@@ -27,7 +27,7 @@ class ResponseData(BaseModel):
     text: str = Field(..., max_length=2000, description="当前系统回复的text")
 
 
-class TableQAResponse(BaseModel):
+class ResponseModel(BaseModel):
     success: bool = Field(..., description="判断状态标识")
     code: str = Field(..., description="返回码")
     message: str = Field(..., description="具体信息")
