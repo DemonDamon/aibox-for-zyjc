@@ -14,7 +14,9 @@ class RequestModel(BaseModel):
     request_id: str = Field(..., description="单次请求id")
     session_id: str = Field(..., description="当前对话id")
     query: str = Field(..., max_length=2000, description="当前用户输入text，限制2k以内")
-    table_file: Optional[Union[UploadFile, str]] = Field(None, description="二进制数据，如果传过来则针对当前表格进行问答，否则根据默认已传表格问答")
+    streaming: bool = Field(False, description="是否为流式请求")
+    table_file: Optional[Union[UploadFile, str]] = Field(None,
+                                                         description="二进制数据，如果传过来则针对当前表格进行问答，否则根据默认已传表格问答")
 
     class Config:
         arbitrary_types_allowed = True
@@ -24,7 +26,9 @@ class RequestModel(BaseModel):
 class ResponseData(BaseModel):
     request_id: str = Field(..., description="单次请求id")
     session_id: str = Field(..., description="当前对话id")
-    text: str = Field(..., max_length=2000, description="当前系统回复的text")
+    result: str = Field(..., max_length=2000, description="当前系统回复的text")
+    chunk_id: Optional[str] = Field(None, description="分块id，如果是流式请求，则需要返回分块id")
+    is_end: bool = Field(False, description="是否为最后一块回复")
 
 
 class ResponseModel(BaseModel):

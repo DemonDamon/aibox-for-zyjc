@@ -4,12 +4,14 @@
 # Author  : Damon
 # E-mail  : bingzhenli@hotmail.com
 
+import os
 
 PROJECT_NAME = "龙政智搜"
 HOST = "0.0.0.0"
 PORT = 5001
 DEBUG = True
 LIFESPAN = "on"
+ROOT_PATH = os.path.abspath(os.path.dirname(__file__)) + '/../'
 
 SUCCESS_CODE = "0000"
 
