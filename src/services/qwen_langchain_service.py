@@ -4,7 +4,7 @@
 # Author  : Damon
 # E-mail  : bingzhenli@hotmail.com
 
-
+import time
 import json
 import uuid
 from typing import Any, Iterator, List, Optional
@@ -14,7 +14,6 @@ from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
 from langchain_core.outputs import GenerationChunk
 
-# from langchain.llms.utils import enforce_stop_tokens
 from utils.logger_utils import logger
 from utils.sse_client import SSEClient
 
@@ -153,7 +152,6 @@ class Qwen(LLM):
         sse_client = SSEClient(response)
         for event in sse_client.events(is_async=False):
             parsed_response = json.loads(event.data)
-            logger.debug(f"Qwen response: {parsed_response}")
             delta = parsed_response["choices"][0]["delta"]
             text = delta.get("content", None)
             if text is None:

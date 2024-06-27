@@ -13,6 +13,9 @@ DEBUG = True
 LIFESPAN = "on"
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__)) + '/../'
 
+MODEL_NAME = "Qwen1.5-32B-Chat-GPTQ-Int4"
+ENDPOINT_URL = "http://192.168.32.113:7820/aibox/v1/llm/chat/completions"
+
 SUCCESS_CODE = "0000"
 
 ERROR_CODE = "9999"

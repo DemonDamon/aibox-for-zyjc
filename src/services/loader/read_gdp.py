@@ -9,7 +9,7 @@
 # =====================================================
 
 
-from loader.xlsx_loader import XlsxLoader
+from services.loader.xlsx_loader import XlsxLoader
 
 
 def read_dpg(filepath):

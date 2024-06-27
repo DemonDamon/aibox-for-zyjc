@@ -3,3 +3,5 @@
 # Desc    : 
 # Author  : Damon
 # E-mail  : bingzhenli@hotmail.com
+
+from settings.dev import *

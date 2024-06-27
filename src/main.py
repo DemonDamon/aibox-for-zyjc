@@ -8,7 +8,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-import settings.dev as settings
+import settings
 from api_routers.table_agent_api import api_router as table_agent_api_router
 
 # 创建App

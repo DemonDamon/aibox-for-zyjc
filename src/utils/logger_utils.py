@@ -12,7 +12,7 @@ from typing import Optional
 from logging import handlers
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 
-import settings.dev as settings
+import settings
 from utils.utils import get_host_ip, abspath
 
 
