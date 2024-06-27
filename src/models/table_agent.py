@@ -20,7 +20,7 @@ class TableQARequest(BaseModel):
         arbitrary_types_allowed = True
 
 
-class ResponseModel(BaseModel):
+class TableQAResponse(BaseModel):
     request_id: str = Field(..., description="单次请求id")
     session_id: str = Field(..., description="当前对话id")
     success: bool = Field(..., description="判断状态标识")
