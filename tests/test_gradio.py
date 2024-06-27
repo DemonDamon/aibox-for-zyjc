@@ -16,8 +16,31 @@ from langchain_experimental.tools import PythonAstREPLTool
 from services.qwen_langchain_service import Qwen
 from langchain.chat_models import QianfanChatEndpoint
 
+import logging
+
 
 SUPPORTED_POSTFIX = ['.xlsx', '.xls', '.csv']
+
+# 配置日志模块
+logging.basicConfig(
+    level=logging.INFO,  # 设置最低日志级别为INFO
+    format='%(asctime)s [%(levelname)s] %(message)s',  # 日志格式化字符串
+    datefmt='%Y-%m-%d %H:%M:%S',  # 时间格式
+    handlers=[  # 设置日志处理器
+        logging.FileHandler('app.log', mode='w'),  # 将日志输出到文件
+        logging.StreamHandler(sys.stdout)  # 同时将日志输出到控制台（stdout）
+    ]
+)
+
+# 获取名为当前模块的logger实例
+logger = logging.getLogger(__name__)
+
+
+def clear_conversation(*args):
+    """清空对话历史"""
+    global conversation_history
+    conversation_history = ""
+    logger.info("对话历史已清空")
 
 
 def get_file_extension(filename):
@@ -38,6 +61,8 @@ def get_file_extension(filename):
 
 
 def get_llm(model_choice):
+    logger.info(f"选择模型{model_choice}")
+
     if model_choice == "Qwen":
         return Qwen(
             model="Qwen1.5-32B-Chat-GPTQ-Int4",
@@ -76,18 +101,35 @@ def capture_output(func):
     return wrapper
 
 
+# 初始化对话历史
+conversation_history = ""
+
+
 @capture_output
-def analyze_table(file, question, model_choice):
-    file_ext = get_file_extension(file.name)
+def analyze_table(file, local_file, question, model_choice):
+    global conversation_history
+
+    if file:
+        file_name = file.name
+    elif local_file:
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        file_name = os.path.join(curr_dir, "data", local_file)
+    else:
+        raise ValueError("请上传文件或选择本地文件")
+
+    logger.info(f"当前上传文件为：{file}")
+    logger.info(f"当前选择的表格文件为：{local_file}")
+
+    file_ext = get_file_extension(file_name)
     if file_ext not in SUPPORTED_POSTFIX:
         raise ValueError("只支持xlsx、xls和csv格式的文件")
 
     if file_ext == ".xlsx" or file_ext == ".xls":
         # 读取上传的Excel文件
-        df = pd.read_excel(file.name)
+        df = pd.read_excel(file_name)
     elif file_ext == ".csv":
         # 读取上传的CSV文件
-        df = pd.read_csv(file.name)
+        df = pd.read_csv(file_name)
 
     # 获取选择的LLM
     llm = get_llm(model_choice)
@@ -102,18 +144,31 @@ def analyze_table(file, question, model_choice):
                                               "handle_parsing_errors": True})
 
     try:
-        prompt = f"{question}；要求：1. 请使用工具python_repl_ast；2. 用中文回答"
-        output = agent.run(prompt)
+        # prompt = f"{question}；要求：1. 请使用工具python_repl_ast；2. 用中文回答"
+        prompt = f"用户：{question}"
+        output = agent.run(conversation_history + prompt)
+        conversation_history += f"{prompt}\n助手：{output}\n"
+
+        logger.info(conversation_history)
+
         return output
+
     except ValueError as e:
         return f"错误：{str(e)}"
 
+
+local_table_list = os.listdir("data")
+
+# # 创建可交互的File组件，绑定change事件
+# file_upload = gr.File(interactive=True, label="上传Excel文件").change(clear_conversation, inputs=None, outputs=None)
+# dropdown_table = gr.Dropdown(choices=local_table_list, label="选择本地数据表", interactive=True).change(clear_conversation, inputs=None, outputs=None)
 
 # 创建Gradio界面
 iface = gr.Interface(
     fn=analyze_table,
     inputs=[
         gr.File(label="上传Excel文件"),
+        gr.Dropdown(choices=local_table_list, label="选择本地数据表"),  # 实际应用中此处需动态填充
         gr.Textbox(label="输入你的问题"),
         gr.Radio(["Qwen", "Qianfan"], label="选择模型", value="Qwen")
     ],
