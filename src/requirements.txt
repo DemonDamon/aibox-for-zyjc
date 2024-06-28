@@ -4,7 +4,9 @@ pydantic_settings
 openpyxl
 python-docx
 pandas
-langchian
+langchain
 langchain-core
 langchain-community
 langchain_experimental
+tabulate
+qianfan

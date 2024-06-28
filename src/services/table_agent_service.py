@@ -7,6 +7,7 @@
 import pandas as pd
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain_experimental.tools import PythonAstREPLTool
+from langchain_community.chat_models import QianfanChatEndpoint
 
 import settings
 from services.qwen_langchain_service import Qwen
@@ -15,12 +16,21 @@ from utils.logger_utils import logger
 
 class TableAgentService:
     def __init__(self):
-        self.llm = Qwen(model=settings.MODEL_NAME, endpoint_url=settings.ENDPOINT_URL, stream=True)
+        # self.llm = Qwen(model=settings.MODEL_NAME, endpoint_url=settings.ENDPOINT_URL, stream=True)
+        self.llm = QianfanChatEndpoint(
+            model="ERNIE-4.0-8K",
+            temperature=0.2,
+            timeout=30,
+            api_key="gp0NggdSwB8F7VXnqHLRrHPv",
+            secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+            top_p="0.8",
+            streaming=True
+        )
 
     def agent(self):
         # 数据
         logger.info("Loading data...")
-        df = pd.read_excel("../tests/data/gdp.xlsx")
+        df = pd.read_excel("../tests/data/统计年鉴-生产总值相关数据.xlsx")
 
         # 工具
         tool = PythonAstREPLTool(locals={"df": df})

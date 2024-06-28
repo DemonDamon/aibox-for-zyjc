@@ -17,6 +17,7 @@ services:
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro
       - ../src:/opt/app
+      - ../tests:/opt/tests
     command: python main.py --app-type zyjc
     logging:
       driver: "json-file"

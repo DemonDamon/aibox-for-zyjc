@@ -72,7 +72,7 @@ class Qwen(LLM):
         # HTTP headers for authorization
         headers = {"Content-Type": "application/json"}
 
-        self.messages.append({"role": "user", "content": prompt})
+        self.messages = [{"role": "user", "content": prompt}]
 
         payload = json.dumps({
             "request_id": str(uuid.uuid4().hex),
@@ -127,7 +127,7 @@ class Qwen(LLM):
     ) -> Iterator[GenerationChunk]:
         headers = {"Content-Type": "application/json"}
 
-        self.messages.append({"role": "user", "content": prompt})
+        self.messages = [{"role": "user", "content": prompt}]
 
         payload = json.dumps({
             "request_id": str(uuid.uuid4().hex),
