@@ -55,7 +55,8 @@ async def table_qa(request_data: RequestModel):
     """
     示例：获取表代理的信息
     """
-    output = table_agent_service(request_data.query, streaming=request_data.streaming)
+
+    output = table_agent_service(request_data, streaming=request_data.streaming)
     if request_data.streaming:
         generator = streaming_data(output, request_data)
         return EventSourceResponse(generator, media_type="text/event-stream")
