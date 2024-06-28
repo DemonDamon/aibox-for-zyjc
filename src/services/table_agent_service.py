@@ -55,8 +55,10 @@ class TableAgentService:
         final = False
         async for event in agent.astream_events(prompt, version="v1"):
             kind = event["event"]
-            if kind == "on_llm_stream":
-                msg += event['data']['chunk']
+            # if kind == "on_llm_stream":
+            if kind == "on_chat_model_stream":
+                if event['data']['chunk'].content:
+                    msg += event['data']['chunk'].content
                 if not final and "Final Answer:" in msg:
                     logger.info("Final Answer:")
                     _msg = msg.split("Final Answer:")[1].lstrip()
@@ -64,7 +66,7 @@ class TableAgentService:
                         yield _msg
                     final = True
                 elif final:
-                    yield event['data']['chunk']
+                    yield event['data']['chunk'].content
 
         logger.info("Stream ended.")
 
