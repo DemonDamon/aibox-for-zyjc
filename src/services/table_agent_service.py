@@ -26,8 +26,9 @@ class TableAgentService:
             top_p="0.8",
             streaming=True
         )
+        self.agent = self.build_agent()
 
-    def agent(self):
+    def build_agent(self):
         # 数据
         logger.info("Loading data...")
         df = pd.read_excel("../tests/data/统计年鉴-生产总值相关数据.xlsx")
@@ -68,11 +69,10 @@ class TableAgentService:
         logger.info("Stream ended.")
 
     def __call__(self, query, streaming=False):
-        agent = self.agent()
         # 初始化对话历史
         conversation_history = ""
         prompt = f"{query}；要求：1. 请使用工具python_repl_ast；2. 用中文回答"
         if streaming:
-            return self._stream(agent, prompt)
+            return self._stream(self.agent, prompt)
         else:
-            return agent.run(prompt)
+            return self.agent.run(prompt)
