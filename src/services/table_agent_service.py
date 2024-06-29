@@ -23,14 +23,14 @@ class TableAgentService:
         else:
             self.llm_model = "qianfan"
             self.llm = QianfanChatEndpoint(
-                model="ERNIE-4.0-8K",
-                temperature=0.2,
-                timeout=30,
-                api_key="gp0NggdSwB8F7VXnqHLRrHPv",
-                secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
-                top_p="0.8",
-                streaming=True
-            )
+            model="ERNIE-4.0-8K",
+            temperature=0.1,
+            timeout=30,
+            qianfan_ak="gp0NggdSwB8F7VXnqHLRrHPv",
+            qianfan_sk="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+            top_p=1,
+            streaming=True
+        )
         self.sessions = Sessions()
         self.agent = self.build_agent()
 
@@ -70,6 +70,7 @@ class TableAgentService:
 
                 if content:
                     msg += content
+                    yield content
                 if not final and "Final Answer:" in msg:
                     _msg = msg.split("Final Answer:")[1].lstrip()
                     if _msg:
@@ -78,10 +79,10 @@ class TableAgentService:
                         # 最多存放5组对话
                         if len(session.messages) > 10:
                             del session.messages[0:2]
-                        yield _msg
-                    final = True
-                elif final:
-                    yield content
+                #         yield _msg
+                #     final = True
+                # elif final:
+                #     yield content
 
     def __call__(self, request_data, streaming=False):
         # 初始化对话历史

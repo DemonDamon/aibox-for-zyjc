@@ -8,6 +8,7 @@ from typing import Union
 from uuid import uuid4
 
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 
 import settings
 from models.table_agent import RequestModel, ResponseData, ResponseModel
@@ -21,7 +22,7 @@ table_agent_service = TableAgentService()
 
 async def streaming_data(output, request_data):
     async for i in output:
-        data = ResponseModel(
+        data = jsonable_encoder(ResponseModel(
             code=settings.SUCCESS_CODE,
             success=True,
             message="success",
@@ -32,9 +33,9 @@ async def streaming_data(output, request_data):
                 chunk_id=str(uuid4().hex),
                 is_end=False,
             )
-        ).model_dump_json(exclude_unset=True)
+        ), exclude_unset=True)
         yield ServerSentEvent(data=data)
-    data = ResponseModel(
+    data = jsonable_encoder(ResponseModel(
         code=settings.SUCCESS_CODE,
         success=True,
         message="success",
@@ -45,7 +46,7 @@ async def streaming_data(output, request_data):
             chunk_id=str(uuid4().hex),
             is_end=True,
         )
-    ).model_dump_json(exclude_unset=True)
+    ), exclude_unset=True)
     yield ServerSentEvent(data=data)
     yield ServerSentEvent(data="[DONE]", event="close")
 
@@ -65,9 +66,12 @@ async def table_qa(request_data: RequestModel):
             code=settings.SUCCESS_CODE,
             success=True,
             message="success",
-            data=ResponseData(
-                request_id=request_data.request_id,
-                session_id=request_data.session_id,
-                result=output
-            ).model_dump(exclude_unset=True)
+            data=jsonable_encoder(
+                ResponseData(
+                    request_id=request_data.request_id,
+                    session_id=request_data.session_id,
+                    result=output
+                ),
+                exclude_unset=True
+            )
         )
