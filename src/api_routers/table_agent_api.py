@@ -14,10 +14,9 @@ import settings
 from models.table_agent import RequestModel, ResponseData, ResponseModel
 from services.table_agent_service import TableAgentService
 from utils.sse import EventSourceResponse, ServerSentEvent
-from utils.logger_utils import logger
 
 api_router = APIRouter()
-table_agent_service = TableAgentService()
+table_agent_service = TableAgentService(qwen=False)
 
 
 async def streaming_data(output, request_data):

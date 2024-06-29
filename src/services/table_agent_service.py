@@ -62,12 +62,15 @@ class TableAgentService:
             kind = event["event"]
             if self.llm_model == "qwen":
                 kind_key = "on_llm_stream"
-                content = event['data']['chunk']
+
             else:
                 kind_key = "on_chat_model_stream"
-                content = event['data']['chunk'].content
-            if kind == kind_key:
 
+            if kind == kind_key:
+                if self.llm_model == "qwen":
+                    content = event['data']['chunk']
+                else:
+                    content = event['data']['chunk'].content
                 if content:
                     msg += content
                     yield content
