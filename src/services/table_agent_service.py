@@ -62,20 +62,22 @@ class TableAgentService:
             if kind == "on_chat_model_stream":
                 if event['data']['chunk'].content:
                     print(f"打印输出：{event['data']['chunk'].content}")
-                    msg += event['data']['chunk'].content
-                if not final and "Final Answer:" in msg:
-                    logger.info("Final Answer:")
-                    _msg = msg.split("Final Answer:")[1].lstrip()
-                    if _msg:
-                        # 存放历史消息
-                        session.messages.append(Message(role="assistant", content=_msg))
-                        # 最多存放5组对话
-                        if len(session.messages) > 10:
-                            del session.messages[0:2]
-                        yield _msg
-                    final = True
-                elif final:
+                    # msg += event['data']['chunk'].content
                     yield event['data']['chunk'].content
+                # if not final and "Final Answer:" in msg:
+                #     logger.info("Final Answer:")
+                #     # _msg = msg.split("Final Answer:")[1].lstrip()
+                #     _msg = msg.split("Final Answer:")[1].lstrip()
+                #     if _msg:
+                #         # 存放历史消息
+                #         session.messages.append(Message(role="assistant", content=_msg))
+                #         # 最多存放5组对话
+                #         if len(session.messages) > 10:
+                #             del session.messages[0:2]
+                #         yield _msg
+                #     final = True
+                # elif final:
+                #     yield event['data']['chunk'].content
 
         logger.info("Stream ended.")
 
