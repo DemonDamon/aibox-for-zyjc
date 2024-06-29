@@ -18,13 +18,22 @@ from models.llm import *
 class TableAgentService:
     def __init__(self):
         # self.llm = Qwen(model=settings.MODEL_NAME, endpoint_url=settings.ENDPOINT_URL, stream=True)
+        # self.llm = QianfanChatEndpoint(
+        #     model="ERNIE-4.0-8K",
+        #     temperature=0.2,
+        #     timeout=30,
+        #     api_key="gp0NggdSwB8F7VXnqHLRrHPv",
+        #     secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+        #     top_p="0.8",
+        #     streaming=True
+        # )
         self.llm = QianfanChatEndpoint(
             model="ERNIE-4.0-8K",
-            temperature=0.2,
+            temperature=0.1,
             timeout=30,
-            api_key="gp0NggdSwB8F7VXnqHLRrHPv",
-            secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
-            top_p="0.8",
+            qianfan_ak="gp0NggdSwB8F7VXnqHLRrHPv",
+            qianfan_sk="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+            top_p=1,
             streaming=True
         )
         self.sessions = Sessions()
