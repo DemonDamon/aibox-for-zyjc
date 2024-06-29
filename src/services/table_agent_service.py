@@ -16,24 +16,28 @@ from models.llm import *
 
 
 class TableAgentService:
-    def __init__(self):
-        # self.llm = Qwen(model=settings.MODEL_NAME, endpoint_url=settings.ENDPOINT_URL, stream=True)
-        self.llm = QianfanChatEndpoint(
-            model="ERNIE-4.0-8K",
-            temperature=0.2,
-            timeout=30,
-            api_key="gp0NggdSwB8F7VXnqHLRrHPv",
-            secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
-            top_p="0.8",
-            streaming=True
-        )
+    def __init__(self, qwen=True):
+        if qwen:
+            self.llm_model = "qwen"
+            self.llm = Qwen(model=settings.MODEL_NAME, endpoint_url=settings.ENDPOINT_URL, stream=False)
+        else:
+            self.llm_model = "qianfan"
+            self.llm = QianfanChatEndpoint(
+                model="ERNIE-4.0-8K",
+                temperature=0.2,
+                timeout=30,
+                api_key="gp0NggdSwB8F7VXnqHLRrHPv",
+                secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+                top_p="0.8",
+                streaming=True
+            )
         self.sessions = Sessions()
         self.agent = self.build_agent()
 
     def build_agent(self):
         # 数据
         logger.info("Loading data...")
-        df = pd.read_excel("../tests/data/统计年鉴-生产总值相关数据.xlsx")
+        df = pd.read_excel("../tests/data/黑龙江省年度地区生产总值.xlsx")
 
         # 工具
         tool = PythonAstREPLTool(locals={"df": df})
@@ -51,20 +55,22 @@ class TableAgentService:
         logger.info("Agent created.")
         return agent
 
-    @staticmethod
-    async def _stream(agent, session):
-
+    async def _stream(self, agent, session):
         msg = ''
         final = False
         async for event in agent.astream_events(session.messages, version="v1"):
             kind = event["event"]
-            # if kind == "on_llm_stream":
-            if kind == "on_chat_model_stream":
-                if event['data']['chunk'].content:
-                    print(f"打印输出：{event['data']['chunk'].content}")
-                    msg += event['data']['chunk'].content
+            if self.llm_model == "qwen":
+                kind_key = "on_llm_stream"
+                content = event['data']['chunk']
+            else:
+                kind_key = "on_chat_model_stream"
+                content = event['data']['chunk'].content
+            if kind == kind_key:
+
+                if content:
+                    msg += content
                 if not final and "Final Answer:" in msg:
-                    logger.info("Final Answer:")
                     _msg = msg.split("Final Answer:")[1].lstrip()
                     if _msg:
                         # 存放历史消息
@@ -75,9 +81,7 @@ class TableAgentService:
                         yield _msg
                     final = True
                 elif final:
-                    yield event['data']['chunk'].content
-
-        logger.info("Stream ended.")
+                    yield content
 
     def __call__(self, request_data, streaming=False):
         # 初始化对话历史

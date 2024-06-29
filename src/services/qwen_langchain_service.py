@@ -116,6 +116,7 @@ class Qwen(LLM):
                 f"\nResponse: {response.text}"
             )
 
+        print(text)
         return text
 
     def _stream(
