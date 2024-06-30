@@ -55,10 +55,10 @@ class TableAgentService:
         logger.info("Agent created.")
         return agent
 
-    async def _stream(self, agent, session):
+    async def _stream(self, agent, prompt):
         msg = ''
         final = False
-        async for event in agent.astream_events(session.messages, version="v1"):
+        async for event in agent.astream_events(prompt, version="v1"):
             kind = event["event"]
             if self.llm_model == "qwen":
                 kind_key = "on_llm_stream"
@@ -73,19 +73,19 @@ class TableAgentService:
                     content = event['data']['chunk'].content
                 if content:
                     msg += content
-                    yield content
+                    # yield str(content)
                 if not final and "Final Answer:" in msg:
                     _msg = msg.split("Final Answer:")[1].lstrip()
                     if _msg:
                         # 存放历史消息
-                        session.messages.append(Message(role="assistant", content=_msg))
-                        # 最多存放5组对话
-                        if len(session.messages) > 10:
-                            del session.messages[0:2]
-                #         yield _msg
-                #     final = True
-                # elif final:
-                #     yield content
+                        # session.messages.append(Message(role="assistant", content=_msg))
+                        # # 最多存放5组对话
+                        # if len(session.messages) > 10:
+                        #     del session.messages[0:2]
+                        yield _msg
+                    final = True
+                elif final:
+                    yield content
 
     def __call__(self, request_data, streaming=False):
         # 初始化对话历史
@@ -96,13 +96,12 @@ class TableAgentService:
         if not isinstance(self.sessions.sessions.get(session_id, []), Session):
             self.sessions.sessions[session_id] = Session()
             session = self.sessions.sessions[session_id]
-            print(session)
         else:
             session = self.sessions.sessions.get(session_id, [])
         prompt = f"{query}；要求：1. 请使用工具python_repl_ast；2. 用中文回答"
         # 存放用户消息
         session.messages.append(Message(role="user", content=prompt))
         if streaming:
-            return self._stream(self.agent, session)
+            return self._stream(self.agent, prompt)
         else:
             return self.agent.run(prompt)
