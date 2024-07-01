@@ -23,14 +23,14 @@ class TableAgentService:
         else:
             self.llm_model = "qianfan"
             self.llm = QianfanChatEndpoint(
-            model="ERNIE-4.0-8K",
-            temperature=0.1,
-            timeout=30,
-            qianfan_ak="gp0NggdSwB8F7VXnqHLRrHPv",
-            qianfan_sk="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
-            top_p=1,
-            streaming=True
-        )
+                model="ERNIE-4.0-8K",
+                temperature=0.1,
+                timeout=30,
+                qianfan_ak="gp0NggdSwB8F7VXnqHLRrHPv",
+                qianfan_sk="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
+                top_p=1,
+                streaming=True
+            )
         self.sessions = Sessions()
         self.agent = self.build_agent()
 
