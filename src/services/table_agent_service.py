@@ -4,11 +4,15 @@
 # Author  : Damon
 # E-mail  : bingzhenli@hotmail.com
 
+
+import re
 import pandas as pd
+from collections import defaultdict
+
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain_experimental.tools import PythonAstREPLTool
 from langchain_community.chat_models import QianfanChatEndpoint
-from collections import defaultdict
+
 import settings
 from services.qwen_langchain_service import Qwen
 from utils.logger_utils import logger
@@ -58,6 +62,9 @@ class TableAgentService:
     async def _stream(self, agent, prompt):
         msg = ''
         final = False
+        is_print_thought = False
+        is_print_action = False
+        is_print_start_thought = False
         async for event in agent.astream_events(prompt, version="v1"):
             kind = event["event"]
             if self.llm_model == "qwen":
@@ -71,17 +78,54 @@ class TableAgentService:
                     content = event['data']['chunk']
                 else:
                     content = event['data']['chunk'].content
+
                 if content:
                     msg += content
-                    content = content.replace("Thoug", "思考过程")
-                    if "Thoug" in msg and "ht" in content:
-                        content = content.replace("ht", "")
-                    content = content.replace("Action Input", "工具输入")
-                    content = content.replace("Action", "执行工具")
-                    content = content.replace("Final Answer", "最终结论")
-                    for _ in str(content):
-                        yield _
                     # yield str(content)
+
+                    # content = content.replace("Thoug", "思考过程")
+                    # if "Thoug" in msg and "ht" in content:
+                    #     content = content.replace("ht", "")
+                    # content = content.replace("Action Input", "工具输入")
+                    # content = content.replace("Action", "执行工具")
+                    # content = content.replace("Final Answer", "最终结论")
+                    # logger.info("!!!! - " + content)
+                    # for _ in str(content):
+                    #     yield _
+
+                    if not is_print_start_thought and "Thoug" in msg:
+                        for _ in "让我思考一下，请稍等 ...\n":
+                            yield _
+                        is_print_start_thought = True
+
+                if not final:
+                    if not is_print_thought and "Thought:" in msg and "Action:" in msg:
+                        _pattern = r"Thought:\s*(.*?)\s*Action:"
+                        _match = re.search(_pattern, msg, re.DOTALL)
+                        if _match:
+                            for _ in _match.group(1):
+                                yield _
+                        else:
+                            for _ in "让我再思考一下，请稍等 ...\n":
+                                yield _
+                        is_print_thought = True
+
+                    if not is_print_action and "Action:" in msg:
+                        # _pattern = r"Action:\s*(.*?)\s*Final Answer:"
+                        # _match = re.search(_pattern, msg, re.DOTALL)
+                        # if _match:
+                        #     for _ in _match.group(1):
+                        #         yield _
+
+                        for _ in "\n我准备执行一系列数据操作，请稍等 ...\n":
+                            yield _
+                        is_print_action = True
+
+                    if not final and "Final Answer:" in msg:
+                        _msg = msg.split("Final Answer:")[1].lstrip()
+                        for _ in _msg:
+                            yield _
+
                 # if not final and "Final Answer:" in msg:
                 #     _msg = msg.split("Final Answer:")[1].lstrip()
                 #     if _msg:
@@ -106,7 +150,13 @@ class TableAgentService:
             session = self.sessions.sessions[session_id]
         else:
             session = self.sessions.sessions.get(session_id, [])
-        prompt = f"{query}；要求：1. 请使用工具python_repl_ast；2. 用中文回答；3. 计算前请先导入Pandas库"
+        prompt = f"要求：" \
+                 f"1. 请使用工具python_repl_ast" \
+                 f"2. 用中文回答" \
+                 f"3. 计算前先导入pandas库" \
+                 f"4. 请简明扼要的描述思考过程，且不要提及用到`pandas`和`dataframe`等字眼" \
+                 f"" \
+                 f"现在用户的输入是：{query}"
         # 存放用户消息
         session.messages.append(Message(role="user", content=prompt))
         if streaming:
