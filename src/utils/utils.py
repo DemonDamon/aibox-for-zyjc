@@ -9,6 +9,7 @@
 # =====================================================
 
 import os
+import yaml
 import socket
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__)) + '/../'
@@ -43,10 +44,10 @@ def read_yaml(file_path):
     :param file_path: YAML文件的绝对路径。
     :return: 解析后的数据结构。
     """
-    # 验证文件路径参数
-    if not os.path.isabs(file_path) or '..' in file_path:
-        # 以防止路径遍历攻击
-        raise ValueError("文件路径不合法，禁止使用相对路径或 '..' ")
+    # # 验证文件路径参数
+    # if not os.path.isabs(file_path) or '..' in file_path:
+    #     # 以防止路径遍历攻击
+    #     raise ValueError("文件路径不合法，禁止使用相对路径或 '..' ")
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
