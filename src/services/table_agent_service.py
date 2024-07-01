@@ -73,19 +73,27 @@ class TableAgentService:
                     content = event['data']['chunk'].content
                 if content:
                     msg += content
+                    content = content.replace("Thoug", "思考过程")
+                    if "Thoug" in msg and "ht" in content:
+                        content = content.replace("ht", "")
+                    content = content.replace("Action Input", "工具输入")
+                    content = content.replace("Action", "执行工具")
+                    content = content.replace("Final Answer", "最终结论")
+                    for _ in str(content):
+                        yield _
                     # yield str(content)
-                if not final and "Final Answer:" in msg:
-                    _msg = msg.split("Final Answer:")[1].lstrip()
-                    if _msg:
-                        # 存放历史消息
-                        # session.messages.append(Message(role="assistant", content=_msg))
-                        # # 最多存放5组对话
-                        # if len(session.messages) > 10:
-                        #     del session.messages[0:2]
-                        yield _msg
-                    final = True
-                elif final:
-                    yield content
+                # if not final and "Final Answer:" in msg:
+                #     _msg = msg.split("Final Answer:")[1].lstrip()
+                #     if _msg:
+                #         # 存放历史消息
+                #         # session.messages.append(Message(role="assistant", content=_msg))
+                #         # # 最多存放5组对话
+                #         # if len(session.messages) > 10:
+                #         #     del session.messages[0:2]
+                #         yield _msg
+                #     final = True
+                # elif final:
+                #     yield content
 
     def __call__(self, request_data, streaming=False):
         # 初始化对话历史
@@ -98,7 +106,7 @@ class TableAgentService:
             session = self.sessions.sessions[session_id]
         else:
             session = self.sessions.sessions.get(session_id, [])
-        prompt = f"{query}；要求：1. 请使用工具python_repl_ast；2. 用中文回答"
+        prompt = f"{query}；要求：1. 请使用工具python_repl_ast；2. 用中文回答；3. 计算前请先导入Pandas库"
         # 存放用户消息
         session.messages.append(Message(role="user", content=prompt))
         if streaming:
