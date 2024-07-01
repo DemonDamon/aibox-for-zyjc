@@ -44,7 +44,7 @@ class TableAgentService:
         df = pd.read_excel("../tests/data/黑龙江省年度地区生产总值.xlsx")
 
         # 工具
-        tool = PythonAstREPLTool(locals={"df": df})
+        # tool = PythonAstREPLTool(locals={"df": df})
         # tool.invoke("df['GDP(万亿)'].mean()")
         logger.info("Creating agent...")
 
@@ -100,14 +100,14 @@ class TableAgentService:
 
                 if not final:
                     if not is_print_thought and "Thought:" in msg and "Action:" in msg:
-                        _pattern = r"Thought:\s*(.*?)\s*Action:"
-                        _match = re.search(_pattern, msg, re.DOTALL)
-                        if _match:
-                            for _ in _match.group(1):
-                                yield _
-                        else:
-                            for _ in "让我再思考一下，请稍等 ...\n":
-                                yield _
+                        # _pattern = r"Thought:\s*(.*?)\s*Action:"
+                        # _match = re.search(_pattern, msg, re.DOTALL)
+                        # if _match:
+                        #     for _ in _match.group(1):
+                        #         yield _
+                        # else:
+                        #     for _ in "让我再思考一下，请稍等 ...\n":
+                        #         yield _
                         is_print_thought = True
 
                     if not is_print_action and "Action:" in msg:
@@ -117,7 +117,7 @@ class TableAgentService:
                         #     for _ in _match.group(1):
                         #         yield _
 
-                        for _ in "\n我准备执行一系列数据操作，请稍等 ...\n":
+                        for _ in "我准备执行一系列数据操作，请稍等 ...\n":
                             yield _
                         is_print_action = True
 
@@ -125,6 +125,7 @@ class TableAgentService:
                         _msg = msg.split("Final Answer:")[1].lstrip()
                         for _ in _msg:
                             yield _
+                        final = True
 
                 # if not final and "Final Answer:" in msg:
                 #     _msg = msg.split("Final Answer:")[1].lstrip()
@@ -154,7 +155,8 @@ class TableAgentService:
                  f"1. 请使用工具python_repl_ast" \
                  f"2. 用中文回答" \
                  f"3. 计算前先导入pandas库" \
-                 f"4. 请简明扼要的描述思考过程，且不要提及用到`pandas`和`dataframe`等字眼" \
+                 f"4. 思考过程只需要给出简明扼要的逻辑，且不要提及用到`pandas`和`dataframe`等字眼" \
+                 f"5. 思考过程不要提及使用到工具，以及数据细节" \
                  f"" \
                  f"现在用户的输入是：{query}"
         # 存放用户消息
