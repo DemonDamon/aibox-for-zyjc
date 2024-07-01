@@ -27,7 +27,23 @@ def test_stream_output():
                                 stream=True)
 
     for line in response.iter_lines():
-        print(line.decode("UTF-8"))
+        str_data = line.decode("UTF-8")
+        if "data: " in str_data:
+            # 将单引号替换为双引号，并将True和False替换为小写（JSON标准）
+            valid_json_str = str_data.replace("'", "\"").\
+                replace("True", "true").replace("False", "false")
+
+            # 移除开头的"data: "部分
+            valid_json_str = valid_json_str[6:]
+
+            # 解析JSON字符串
+            try:
+                data = json.loads(valid_json_str)
+                # 提取result的内容
+                result = data['data']['result']
+                print(result, end='')
+            except json.JSONDecodeError as e:
+                print(f"JSON解析错误: {e}")
 
 
 if __name__ == "__main__":
