@@ -13,7 +13,7 @@ def test_stream_output():
     payload = json.dumps({
         "request_id": "100220011022121",
         "session_id": "2",
-        "query": "黑龙江第三产业增加值是多少",
+        "query": "黑龙江第一产业占比均值是多少",
         "streaming": True
     })
     headers = {
