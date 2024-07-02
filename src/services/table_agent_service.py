@@ -8,6 +8,8 @@
 import os
 import random
 import re
+import time
+
 import pandas as pd
 from collections import defaultdict
 
@@ -148,6 +150,7 @@ class TableAgentService:
                     if not is_print_start_thought and "Thoug" in msg:
                         for _ in random.choice(let_me_think):
                             yield _
+                            time.sleep(0.1)
                         is_print_start_thought = True
 
                     if not is_print_thought and "Thought:" in msg and "Action:" in msg:
@@ -170,16 +173,21 @@ class TableAgentService:
 
                         for _ in random.choice(let_me_try):
                             yield _
+                            time.sleep(0.1)
+
                         is_print_action = True
 
                     if is_start_final:
                         for _ in content:
                             yield _
+                            time.sleep(0.1)
 
                     if not is_start_final and "Final Answer:" in content:
                         _msg = msg.split("Final Answer:")[1].lstrip()
                         for _ in _msg:
                             yield _
+                            time.sleep(0.1)
+
                         is_start_final = True
 
                     # if not final and "Final Answer:" in msg:
@@ -214,6 +222,7 @@ class TableAgentService:
                     logger.info("!!!!"+content)
                     for _ in content:
                         yield _
+                        time.sleep(0.1)
 
     def __call__(self, request_data, streaming=False):
         # 初始化对话历史
