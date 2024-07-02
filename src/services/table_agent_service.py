@@ -88,7 +88,10 @@ class TableAgentService:
         #     ("user", query)
         # ]
         llm_input = self.intentcls_prompt.replace("{query}", query)
-        return self.llm.invoke(llm_input)
+        if self.llm_model == "qianfan":
+            return self.llm.invoke(llm_input)
+        else:
+            raise ValueError(f"{self.llm_model} not support")
 
     def build_table_agent(self):
         # 数据
@@ -148,10 +151,10 @@ class TableAgentService:
                     #     yield _
 
                     if not is_print_start_thought and "Thoug" in msg:
+                        is_print_start_thought = True
                         for _ in random.choice(let_me_think):
                             yield _
                             time.sleep(0.1)
-                        is_print_start_thought = True
 
                     if not is_print_thought and "Thought:" in msg and "Action:" in msg:
                         # _pattern = r"Thought:\s*(.*?)\s*Action:"
@@ -165,6 +168,8 @@ class TableAgentService:
                         is_print_thought = True
 
                     if not is_print_action and "Action:" in msg:
+                        is_print_action = True
+
                         # _pattern = r"Action:\s*(.*?)\s*Final Answer:"
                         # _match = re.search(_pattern, msg, re.DOTALL)
                         # if _match:
@@ -175,20 +180,17 @@ class TableAgentService:
                             yield _
                             time.sleep(0.1)
 
-                        is_print_action = True
-
                     if is_start_final:
                         for _ in content:
                             yield _
                             time.sleep(0.1)
 
                     if not is_start_final and "Final Answer:" in content:
+                        is_start_final = True
                         _msg = msg.split("Final Answer:")[1].lstrip()
                         for _ in _msg:
                             yield _
                             time.sleep(0.1)
-
-                        is_start_final = True
 
                     # if not final and "Final Answer:" in msg:
                     #     _msg = msg.split("Final Answer:")[1].lstrip()
