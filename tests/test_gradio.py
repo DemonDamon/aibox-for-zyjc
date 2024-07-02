@@ -14,7 +14,8 @@ import pandas as pd
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain_experimental.tools import PythonAstREPLTool
 from services.qwen_langchain_service import Qwen
-from langchain.chat_models import QianfanChatEndpoint
+# from langchain.chat_models import QianfanChatEndpoint
+from langchain_community.chat_models import QianfanChatEndpoint
 
 import logging
 
@@ -63,20 +64,20 @@ def get_file_extension(filename):
 def get_llm(model_choice):
     logger.info(f"选择模型{model_choice}")
 
-    if model_choice == "Qwen":
+    if model_choice == "Qwen1.5-32B-Chat-GPTQ-Int4":
         return Qwen(
             model="Qwen1.5-32B-Chat-GPTQ-Int4",
             endpoint_url="http://192.168.32.113:7820/aibox/v1/llm/chat/completions",
             stream=True
         )
-    elif model_choice == "Qianfan":
+    elif model_choice == "ERNIE-4.0-8K":
         return QianfanChatEndpoint(
             model="ERNIE-4.0-8K",
-            temperature=0.2,
+            temperature=0.1,
             timeout=30,
             api_key="gp0NggdSwB8F7VXnqHLRrHPv",
             secret_key="KqZ0IGJiQIypzwTVJRFcBajF3WjIJbOt",
-            top_p="0.8",
+            top_p=1,
             streaming=True
         )
 
@@ -170,7 +171,7 @@ iface = gr.Interface(
         gr.File(label="上传Excel文件"),
         gr.Dropdown(choices=local_table_list, label="选择本地数据表"),  # 实际应用中此处需动态填充
         gr.Textbox(label="输入你的问题"),
-        gr.Radio(["Qwen", "Qianfan"], label="选择模型", value="Qwen")
+        gr.Radio(["Qwen1.5-32B-Chat-GPTQ-Int4", "ERNIE-4.0-8K"], label="选择模型", value="Qwen")
     ],
     outputs=[
         gr.Textbox(label="回答"),
