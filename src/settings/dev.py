@@ -13,11 +13,11 @@ DEBUG = True
 LIFESPAN = "on"
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__)) + '/../'
 
-MODEL_NAME = "Qwen1.5-32B-Chat-GPTQ-Int4"
-ENDPOINT_URL = "http://192.168.32.113:7820/aibox/v1/llm/chat/completions"
+MODEL_NAME_32B = "Qwen1.5-32B-Chat-GPTQ-Int4"
+ENDPOINT_URL_32B = "http://192.168.32.113:7820/aibox/v1/openai"
 #
-# MODEL_NAME = "Qwen2-72B-Instruct-GPTQ-Int4"
-# ENDPOINT_URL = "http://192.168.32.250:6822/aibox/v1/llm/chat/completions"
+MODEL_NAME_72B = "Qwen2-72B-Instruct-GPTQ-Int4"
+ENDPOINT_URL_72B = "http://192.168.32.250:6821/aibox/v1/openai"
 
 SUCCESS_CODE = "0000"
 
