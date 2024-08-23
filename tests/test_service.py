@@ -50,7 +50,7 @@ def test_multiturn():
     import requests
     import json
 
-    url = "http://localhost:5001/cmict/table-agent"
+    url = "http://0.0.0.0:5001/cmict/table-agent"
 
     while True:
         query = input("【用户】：")
