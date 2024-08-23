@@ -6,6 +6,8 @@ LABEL authors="leemysw"
 
 WORKDIR /opt/app
 
+COPY agents.py  /usr/local/lib/python3.10/site-packages/langchain_core/agents.py
+
 COPY requirements.txt .
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \

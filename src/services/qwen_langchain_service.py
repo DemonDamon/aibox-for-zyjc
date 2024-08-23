@@ -18,6 +18,9 @@ from utils.logger_utils import logger
 from utils.sse_client import SSEClient
 
 
+from langchain_community.llms import BaichuanLLM
+
+
 class Qwen(LLM):
     """Qwen LLM API service.
 

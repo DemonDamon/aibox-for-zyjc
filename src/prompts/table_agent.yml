@@ -1,0 +1,8 @@
+specific_prompt_template:
+    - 20240704: |
+        ### 任务要求：
+        1. 使用python_repl_ast工具，从df中获取用户问题相关的数据。
+        2. 用中文回答
+        3. 计算前先导入pandas库，采用markdown的代码格式输出
+        4. 思考过程，将dataframe结果转换成列表
+        5. 思考过程不要作图，使用数据分析
