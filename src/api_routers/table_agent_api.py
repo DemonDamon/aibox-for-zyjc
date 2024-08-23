@@ -1,15 +1,14 @@
-
 # Date    : 2024/6/26 14:48
 # File    : table_agent_api.py
-# Desc    :
+# Desc    : 
 # Author  : Damon
 # E-mail  : bingzhenli@hotmail.com
 
+import time
 from typing import Union
 from uuid import uuid4
 
 from fastapi import APIRouter
-from fastapi.encoders import jsonable_encoder
 
 import settings
 from models.table_agent import RequestModel, ResponseData, ResponseModel
@@ -18,12 +17,13 @@ from utils.sse import EventSourceResponse, ServerSentEvent
 from utils.logger_utils import logger
 
 api_router = APIRouter()
-table_agent_service = TableAgentService(qwen=False)
+table_agent_service = TableAgentService()
 
 
 async def streaming_data(output, request_data):
     async for i in output:
-        data = jsonable_encoder(ResponseModel(
+        logger.info(f"streaming data for request_id: -- {i}")
+        data = ResponseModel(
             code=settings.SUCCESS_CODE,
             success=True,
             message="success",
@@ -34,9 +34,9 @@ async def streaming_data(output, request_data):
                 chunk_id=str(uuid4().hex),
                 is_end=False,
             )
-        ), exclude_unset=True)
+        ).model_dump_json(exclude_unset=True)
         yield ServerSentEvent(data=data)
-    data = jsonable_encoder(ResponseModel(
+    data = ResponseModel(
         code=settings.SUCCESS_CODE,
         success=True,
         message="success",
@@ -47,7 +47,7 @@ async def streaming_data(output, request_data):
             chunk_id=str(uuid4().hex),
             is_end=True,
         )
-    ), exclude_unset=True)
+    ).model_dump_json(exclude_unset=True)
     yield ServerSentEvent(data=data)
     logger.info(f"streaming data end for request_id: {request_data.request_id}")
 
@@ -64,16 +64,14 @@ async def table_qa(request_data: RequestModel):
         generator = streaming_data(output, request_data)
         return EventSourceResponse(generator, media_type="text/event-stream")
     else:
+        logger.info(f"output-{request_data.request_id}: {output}")
         return ResponseModel(
             code=settings.SUCCESS_CODE,
             success=True,
             message="success",
-            data=jsonable_encoder(
-                ResponseData(
-                    request_id=request_data.request_id,
-                    session_id=request_data.session_id,
-                    result=output
-                ),
-                exclude_unset=True
-            )
+            data=ResponseData(
+                request_id=request_data.request_id,
+                session_id=request_data.session_id,
+                result=output
+            ).model_dump(exclude_unset=True)
         )
